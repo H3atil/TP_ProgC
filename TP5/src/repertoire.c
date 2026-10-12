@@ -1,3 +1,5 @@
+#define _DEFAULT_SOURCE
+
 #include "repertoire.h"
 
 #include <dirent.h>

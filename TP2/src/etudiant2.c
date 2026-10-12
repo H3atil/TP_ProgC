@@ -1,4 +1,6 @@
+#include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct Etudiant
@@ -10,28 +12,72 @@ struct Etudiant
     float note_systeme;
 };
 
+static int lire_ligne(const char *invite, char *destination, size_t capacite)
+{
+    printf("%s", invite);
+    if (fgets(destination, (int)capacite, stdin) == NULL)
+        return 0;
+
+    size_t longueur = strlen(destination);
+    if (longueur > 0 && destination[longueur - 1] == '\n')
+        destination[longueur - 1] = '\0';
+    else
+    {
+        int caractere = getchar();
+        if (caractere != '\n' && caractere != EOF)
+        {
+            while ((caractere = getchar()) != '\n' && caractere != EOF)
+                ;
+            fprintf(stderr, "Saisie trop longue.\n");
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int lire_note(const char *invite, float *note)
+{
+    char texte[64];
+    if (!lire_ligne(invite, texte, sizeof(texte)))
+        return 0;
+
+    char *fin;
+    errno = 0;
+    float valeur = strtof(texte, &fin);
+    while (*fin == ' ' || *fin == '\t')
+        fin++;
+    if (errno == ERANGE || fin == texte || *fin != '\0')
+    {
+        fprintf(stderr, "Note invalide.\n");
+        return 0;
+    }
+    *note = valeur;
+    return 1;
+}
+
 int main(void)
 {
     struct Etudiant etudiants[5];
-    const char *noms[5] = {"Dupont", "Martin", "Bernard", "Petit", "Robert"};
-    const char *prenoms[5] = {"Marie", "Pierre", "Sophie", "Lucas", "Emma"};
-    const char *adresses[5] = {
-        "20, Boulevard Niels Bohr, Lyon",
-        "22, Boulevard Niels Bohr, Lyon",
-        "5, rue des Ecoles, Lyon",
-        "8, avenue de la Republique, Lyon",
-        "14, rue Victor Hugo, Lyon"
-    };
-    const float notes_c[5] = {16.5f, 14.0f, 15.2f, 12.8f, 17.0f};
-    const float notes_systeme[5] = {12.1f, 14.1f, 13.5f, 16.0f, 15.8f};
+    char nom[sizeof(etudiants[0].nom)];
+    char prenom[sizeof(etudiants[0].prenom)];
+    char adresse[sizeof(etudiants[0].adresse)];
 
     for (int i = 0; i < 5; i++)
     {
-        strcpy(etudiants[i].nom, noms[i]);
-        strcpy(etudiants[i].prenom, prenoms[i]);
-        strcpy(etudiants[i].adresse, adresses[i]);
-        etudiants[i].note_c = notes_c[i];
-        etudiants[i].note_systeme = notes_systeme[i];
+        printf("Entrez les détails de l'étudiant.e %d :\n", i + 1);
+        if (!lire_ligne("Nom : ", nom, sizeof(nom))
+            || !lire_ligne("Prénom : ", prenom, sizeof(prenom))
+            || !lire_ligne("Adresse : ", adresse, sizeof(adresse))
+            || !lire_note("Note 1 : ", &etudiants[i].note_c)
+            || !lire_note("Note 2 : ", &etudiants[i].note_systeme))
+        {
+            fprintf(stderr, "Lecture des informations impossible.\n");
+            return 1;
+        }
+
+        strcpy(etudiants[i].nom, nom);
+        strcpy(etudiants[i].prenom, prenom);
+        strcpy(etudiants[i].adresse, adresse);
     }
 
     for (int i = 0; i < 5; i++)
