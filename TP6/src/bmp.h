@@ -31,8 +31,8 @@ typedef struct
 typedef struct
 {
   uint32_t info_header_size;
-  uint32_t largeur;
-  uint32_t hauteur;
+  int32_t largeur;
+  int32_t hauteur;
   uint16_t planes;
   uint16_t compte_bit;
   uint32_t compression;

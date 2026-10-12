@@ -8,15 +8,12 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
+/* Le serveur reçoit et renvoie des objets JSON délimités par une ligne. */
 #define PORT 8089
 
-/* accepter la nouvelle connection d'un client et lire les données
- * envoyées par le client. En suite, le serveur envoie un message
- * en retour
- */
+extern const char *svg_file_path;
 
-const char *svg_file_path = "pie_chart.svg";
-
-int recois_envoie_message(int, char[1024]);
+/* Analyse un objet JSON et traite une opération message, calcule ou couleurs. */
+int recois_envoie_message(int socketfd, const char *message);
 
 #endif
